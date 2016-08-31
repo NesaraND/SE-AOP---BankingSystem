@@ -125,10 +125,7 @@ public class ui {
 		
 		Account account1=new Account(input);
 		
-		System.out.println("Account Number :"+account1.getAccountNumber());
-		System.out.println("Account Balance :"+account1.getAccountBalance());
-		//Account.getAccountHistory(input);
-		//System.out.println("Account Created Date :"+account1.getDateCreated());
+		Account.getAccountHistory(input);
 		
 		User u = new User();
 		System.out.println("Please select an option below to proceed further. Else select Exit");

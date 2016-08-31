@@ -62,15 +62,19 @@ public class JDBCMySQLConnection {
     	ResultSet rs;
     	
     	try{
-    		Statement statement = (Statement) con.createStatement();
-    		
-    		 rs= statement.executeQuery("SELECT AccountNumber, BalanceAmount,DateCreated FROM account WHERE AccountNumber = "+AccountNumber);
-    		 System.out.println(rs.getInt("AccountNumber"));
+    		//Statement statement = (Statement) con.createStatement();
+    		String query = "SELECT * FROM `transaction` WHERE `from` = ? or `to` = ?";
+    		PreparedStatement st = con.prepareStatement(query);
+    		st.setInt(1, AccountNumber);
+    		st.setInt(2, AccountNumber);
+    		rs= st.executeQuery();
+    	
     		while(rs.next()){
-    			System.out.println(rs.getInt("AccountNumber"));
-    			System.out.println(rs.getFloat("BalanceAmount"));
-    			Date date = rs.getDate("DateCreated");
-    			System.out.println(date);
+    			System.out.println("Your Transaction History details are as follows :");
+    			System.out.println("From Account :"+rs.getInt("from"));
+    			System.out.println("To Account :"+rs.getInt("to"));
+    			System.out.println("Amount :"+rs.getFloat("amount"));
+    			System.out.println("Date and Time :"+rs.getString("currentTime"));
     			
     		}
     		
@@ -150,14 +154,20 @@ public class JDBCMySQLConnection {
     public void moneyTransfer(Account a,Account b,float amount) throws InsufficientAccountBalanceException{
     	JDBCMySQLConnection db = new JDBCMySQLConnection();
 		Connection con=db.create_connection();
+		java.util.Date dt = new java.util.Date();
+		java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		String currentTime = sdf.format(dt);
+
 		
 		
 		try{
     		
 			Statement statement1= (Statement) con.createStatement();			
 			Statement statement2= (Statement) con.createStatement();
+			Statement statement3= (Statement) con.createStatement();
 			statement1.executeUpdate("UPDATE `account` SET `BalanceAmount` = `BalanceAmount` - "+amount+" WHERE `AccountNumber` ="+a.accountNumber);
 			statement2.executeUpdate("UPDATE `account` SET `BalanceAmount` = `BalanceAmount` + "+amount+" WHERE `AccountNumber` ="+b.accountNumber);
+			statement3.executeUpdate("INSERT INTO transaction " + "VALUES  ('"+a.accountNumber+"','"+b.accountNumber+"','"+amount+"','"+currentTime+"')");
 			
     	}catch(Exception  e){
     		System.out.println("Money transfer failed");
